@@ -1,65 +1,54 @@
 const express = require('express');
 const router = express.Router();
 const contactsModel = require("../../models/contacts");
-const Joi = require("joi");
+const validateContact = require("../../middlewares/validateContact");
+const controllerWrapper = require("../../controllers/controllerWrapper");
 
-router.get('/', async (req, res, next) => {
+const listContactsController = async (req, res, next) => {
   try {
     const contacts = await contactsModel.listContacts();
     res.json(contacts);
   } catch (error) {
     next(error);
   }
-});
+};
 
-router.get('/:contactId', async (req, res, next) => {
+const getContactByIdController = async (req, res, next) => {
   try {
     const { contactId } = req.params;
     const contact = await contactsModel.getContactById(contactId);
 
     if (!contact) {
-      res.status(404).json({ message: "Not found" });
-      return;
+      const notFoundError = new Error('Not found');
+      notFoundError.status = 404;
+      throw notFoundError;
     }
-  
+
     res.json(contact);
   } catch (error) {
     next(error);
   }
-});
+};
 
-router.post('/', async (req, res, next) => {
+const addContactController = async (req, res, next) => {
   try {
     const { name, email, phone } = req.body;
-
-    const schema = Joi.object({
-      name: Joi.string().required(),
-      email: Joi.string().email().required(),
-      phone: Joi.string().required(),
-    });
-
-    const validationResult = schema.validate({ name, email, phone });
-
-    if (validationResult.error) {
-      res.status(400).json({ message: "Missing required fields" });
-      return;
-    }
-
     const newContact = await contactsModel.addContact({ name, email, phone });
     res.status(201).json(newContact);
   } catch (error) {
     next(error);
   }
-});
+};
 
-router.delete('/:contactId', async (req, res, next) => {
+const removeContactController = async (req, res, next) => {
   try {
     const { contactId } = req.params;
     const contact = await contactsModel.getContactById(contactId);
 
     if (!contact) {
-      res.status(404).json({ message: "Not found" });
-      return;
+      const notFoundError = new Error('Not found');
+      notFoundError.status = 404;
+      throw notFoundError;
     }
 
     await contactsModel.removeContact(contactId);
@@ -67,37 +56,53 @@ router.delete('/:contactId', async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-});
+};
 
-router.put('/:contactId', async (req, res, next) => {
+const updateContactController = async (req, res, next) => {
   try {
     const { contactId } = req.params;
     const { name, email, phone } = req.body;
-
-    const schema = Joi.object({
-      name: Joi.string(),
-      email: Joi.string().email(),
-      phone: Joi.string(),
-    }).min(1);
-
-    const validationResult = schema.validate({ name, email, phone });
-
-    if (validationResult.error) {
-      res.status(400).json({ message: "Missing fields" });
-      return;
-    }
-
     const updatedContact = await contactsModel.updateContact(contactId, { name, email, phone });
 
     if (!updatedContact) {
-      res.status(404).json({ message: "Not found" });
-      return;
+      const notFoundError = new Error('Not found');
+      notFoundError.status = 404;
+      throw notFoundError;
     }
 
     res.json(updatedContact);
   } catch (error) {
     next(error);
   }
-});
+};
+
+const updateStatusContactController = async (req, res, next) => {
+  try {
+    const { contactId } = req.params;
+    const { favorite } = req.body;
+
+    if (typeof favorite === 'undefined') {
+      return res.status(400).json({ message: 'missing field favorite' });
+    }
+
+    const updatedContact = await contactsModel.updateStatusContact(contactId, { favorite });
+
+    if (!updatedContact) {
+      return res.status(404).json({ message: 'Not found' });
+    }
+
+    res.json(updatedContact);
+  } catch (error) {
+    next(error);
+  }
+};
+
+router.get('/', controllerWrapper(listContactsController));
+router.get('/:contactId', controllerWrapper(getContactByIdController));
+router.post('/', validateContact, controllerWrapper(addContactController));
+router.delete('/:contactId', controllerWrapper(removeContactController));
+router.put('/:contactId', validateContact, controllerWrapper(updateContactController));
+router.patch('/:contactId/favorite', controllerWrapper(updateStatusContactController));
+
 
 module.exports = router;
