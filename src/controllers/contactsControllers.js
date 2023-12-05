@@ -2,8 +2,20 @@ const { controllerWrapper, HttpError } = require("../helpers");
 const { contactSchema } = require("../schemas/contactSchemas");
 
 const getAll = async (req, res, next) => {
-  const data = await contactSchema.find();
-  res.json(data);
+  
+  const { _id: owner } = req.user;
+  const { page = 1, limit = 20, favorite } = req.query;
+  const skip = (page - 1) * limit;
+  if (favorite === "true") {
+    const result = await contactSchema.find({ owner, favorite }, "", {
+      skip,
+      limit,
+    });
+    return res.json(result);
+  }
+
+  const data = await contactSchema.find({ owner }, "", { skip, limit });
+  return res.json(data);
 };
 
 const getContactByIdController = async (req, res, next) => {
@@ -17,7 +29,8 @@ const getContactByIdController = async (req, res, next) => {
 }; 
 
 const addContactController = async (req, res, next) => {
-  const result = await contactSchema.create(req.body);
+  const { _id: owner } = req.user;
+  const result = await contactSchema.create(req.body, owner);
   res.status(201).json(result);
 };
 
@@ -28,7 +41,7 @@ const removeContactController = async (req, res, next) => {
     throw HttpError(404, "Not found");
   }
   res.json({
-    message: "contact deleted",
+    message: "Contact has been deleted",
   });
 };
 

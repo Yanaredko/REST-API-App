@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const validateContact = require('../../middlewares/validateContact');
-const { controllerWrapper } = require('../helpers');
 const {
   getAll,
   getContactByIdController,
@@ -12,12 +11,12 @@ const {
 } = require('../controllers/contactControllers');
 
 
-router.get('/', controllerWrapper(getAll));
-router.get('/:contactId', controllerWrapper(getContactByIdController));
-router.post('/', validateContact, controllerWrapper(addContactController));
-router.delete('/:contactId', controllerWrapper(removeContactController));
-router.put('/:contactId', validateContact, controllerWrapper(updateContactController));
-router.patch('/:contactId/favorite', controllerWrapper(updateStatusContactController));
+router.get('/', getAll);
+router.get('/:contactId', getContactByIdController);
+router.post('/', validateContact, addContactController);
+router.delete('/:contactId', removeContactController);
+router.put('/:contactId', validateContact, updateContactController);
+router.patch('/:contactId/favorite', updateStatusContactController);
 
 
 module.exports = router;
