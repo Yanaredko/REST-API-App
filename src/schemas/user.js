@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const gravatar = require('gravatar');
+const nanoid = require('nanoid');
 const Schema = mongoose.Schema;
 const Joi = require('joi');
 const { handleMongooseError } = require("../helpers");
@@ -28,9 +29,17 @@ email: {
     type: String,
   },
   
-  token: String
-},
-  { versionKey: false });
+  token: String,
+  verify: {
+    type: Boolean,
+    default: false,
+  },
+   verificationToken: {
+    type: String,
+    default: () => nanoid(),
+    required: [true, 'Verify token is required'],
+  },
+}, { versionKey: false });
     
 userSchema.pre('validate', async function (next) {
   try {
@@ -62,6 +71,10 @@ const userValidationSchema = Joi.object({
   }),
   subscription: Joi.string().valid('starter', 'pro', 'business').default('starter'),
   token: Joi.string(),
+  verify: Joi.boolean().default(false),
+  verificationToken: Joi.string().required().messages({
+    'any.required': 'Verify token is required',
+  }),
 });
 
 const User = mongoose.model('User', userSchema);
