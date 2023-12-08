@@ -14,6 +14,7 @@ router.get('/logout', userController.logout);
 router.get('/current', userController.getCurrent);
 router.patch('/:userId/subscription', validateContact(schemas.updateSubscriptionSchema), userController.updateSubscriptionById);
 router.patch('/avatars', authenticate, upload.single('avatar'), updateAvatar);
-
+router.get('/verify/:verificationToken', userController.verifyEmail);
+router.post('/verify', validateContact({ email: schemas.userValidationSchema.email }), userController.resendVerificationEmail);
 
 module.exports = router;
