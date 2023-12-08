@@ -1,5 +1,5 @@
 const { User } = require("../../schemas/user");
-const controllerWrapper = require("../../helpers");
+const controllerWrapper = require("../../helpers/controllerWrapper");
 
 const logout = async (req, res) => {
   const { _id } = req.user;

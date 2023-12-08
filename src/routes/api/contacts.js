@@ -8,7 +8,7 @@ const {
   removeContactController,
   updateContactController,
   updateStatusContactController,
-} = require('../controllers/contactControllers');
+} = require('../../controllers/contactsControllers');
 
 
 router.get('/', getAll);

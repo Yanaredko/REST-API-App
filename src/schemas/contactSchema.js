@@ -1,6 +1,6 @@
 const Joi = require("joi");
 const mongoose = require('mongoose');
-const handleMongooseError = require("../helpers/handleMongooseError");
+const handleMongooseError = require("../helpers/mongooseError");
 
 const contactSchema = new mongoose.Schema({
   name: {

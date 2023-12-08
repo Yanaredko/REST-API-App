@@ -1,4 +1,4 @@
-const controllerWrapper = require("../../helpers");
+const controllerWrapper = require("../../helpers/controllerWrapper");
 
 const getCurrent = async (req, res) => {
   const { email, subscription } = req.user;
