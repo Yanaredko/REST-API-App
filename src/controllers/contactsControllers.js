@@ -1,5 +1,5 @@
 const { controllerWrapper, HttpError } = require("../helpers");
-const { contactSchema } = require("../schemas/contactSchemas");
+const { contactSchema } = require("../schemas/contactSchema");
 
 const getAll = async (req, res, next) => {
   
